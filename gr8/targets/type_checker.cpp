@@ -33,6 +33,64 @@ void gr8::type_checker::do_or_node(cdk::or_node * const node, int lvl) {
   // EMPTY
 }
 
+void gr8::type_checker::do_sweeping_node(gr8::sweeping_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_return_node(gr8::return_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_block_node(gr8::block_node *const node, int lvl) {
+  // EMPTY
+}
+
+
+void gr8::type_checker::do_var_declaration_node(gr8::var_declaration_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_again_node(gr8::again_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_stop_node(gr8::stop_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_func_declaration_node(gr8::func_declaration_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_func_invocation_node(gr8::func_invocation_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_func_body_node(gr8::func_body_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_null_node(gr8::null_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_mem_alloc_node(gr8::mem_alloc_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_mem_address_node(gr8::mem_address_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_identity_node(gr8::identity_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::type_checker::do_indexing_node(gr8::indexing_node *const node, int lvl) {
+  // EMPTY
+}
+
+
 //---------------------------------------------------------------------------
 
 void gr8::type_checker::do_integer_node(cdk::integer_node * const node, int lvl) {
@@ -156,10 +214,6 @@ void gr8::type_checker::do_assignment_node(cdk::assignment_node * const node, in
 
 //---------------------------------------------------------------------------
 
-void gr8::type_checker::do_program_node(gr8::program_node * const node, int lvl) {
-  // EMPTY
-}
-
 void gr8::type_checker::do_evaluation_node(gr8::evaluation_node * const node, int lvl) {
   node->argument()->accept(this, lvl + 2);
 }
@@ -172,17 +226,12 @@ void gr8::type_checker::do_print_node(gr8::print_node * const node, int lvl) {
 
 void gr8::type_checker::do_read_node(gr8::read_node * const node, int lvl) {
   try {
-    node->argument()->accept(this, lvl);
+
   } catch (const std::string &id) {
     throw "undeclared variable '" + id + "'";
   }
 }
 
-//---------------------------------------------------------------------------
-
-void gr8::type_checker::do_while_node(gr8::while_node * const node, int lvl) {
-  node->condition()->accept(this, lvl + 4);
-}
 
 //---------------------------------------------------------------------------
 
@@ -192,4 +241,12 @@ void gr8::type_checker::do_if_node(gr8::if_node * const node, int lvl) {
 
 void gr8::type_checker::do_if_else_node(gr8::if_else_node * const node, int lvl) {
   node->condition()->accept(this, lvl + 4);
+}
+
+void gr8::type_checker::do_apply_node(gr8::apply_node * const node, int lvl) {
+  //ASSERT_SAFE_EXPRESSIONS;
+   node->vector()->accept(this, lvl + 4);
+   node->from()->accept(this, lvl + 4);
+   node->to()->accept(this, lvl + 4);
+
 }

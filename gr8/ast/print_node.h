@@ -1,4 +1,4 @@
-// $Id: print_node.h,v 1.1 2018/02/23 17:43:01 ist13500 Exp $ -*- c++ -*-
+// $Id: print_node.h,v 1.3 2018/04/18 21:23:16 ist424833 Exp $ -*- c++ -*-
 #ifndef __GR8_PRINTNODE_H__
 #define __GR8_PRINTNODE_H__
 
@@ -11,10 +11,13 @@ namespace gr8 {
    */
   class print_node: public cdk::basic_node {
     cdk::expression_node *_argument;
+    bool _isTweetOrPost;
 
   public:
-    inline print_node(int lineno, cdk::expression_node *argument) :
-        cdk::basic_node(lineno), _argument(argument) {
+    inline print_node(int lineno, cdk::expression_node *argument, bool isTweetOrPost) :
+        cdk::basic_node(lineno), _argument(argument), _isTweetOrPost(isTweetOrPost) {
+            // True: tweet 
+            // False: post
     }
 
   public:

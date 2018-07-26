@@ -24,6 +24,54 @@ void gr8::postfix_writer::do_and_node(cdk::and_node * const node, int lvl) {
 void gr8::postfix_writer::do_or_node(cdk::or_node * const node, int lvl) {
   // EMPTY
 }
+void gr8::postfix_writer::do_block_node(gr8::block_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_var_declaration_node(gr8::var_declaration_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_again_node(gr8::again_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_stop_node(gr8::stop_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_func_declaration_node(gr8::func_declaration_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_func_invocation_node(gr8::func_invocation_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_func_body_node(gr8::func_body_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_null_node(gr8::null_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_mem_alloc_node(gr8::mem_alloc_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_mem_address_node(gr8::mem_address_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_identity_node(gr8::identity_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_indexing_node(gr8::indexing_node *const node, int lvl) {
+  // EMPTY
+}
+
 
 //---------------------------------------------------------------------------
 
@@ -164,36 +212,6 @@ void gr8::postfix_writer::do_assignment_node(cdk::assignment_node * const node, 
 
 //---------------------------------------------------------------------------
 
-void gr8::postfix_writer::do_program_node(gr8::program_node * const node, int lvl) {
-  // Note that Simple didn't have functions. Thus, it didn't need
-  // a function node. However, it had to start in the main function.
-  // program_node (representing the whole program) doubled as a
-  // main function node.
-
-  // generate the main function (RTS mandates that its name be "_main")
-  _pf.TEXT();
-  _pf.ALIGN();
-  _pf.GLOBAL("_main", _pf.FUNC());
-  _pf.LABEL("_main");
-  _pf.ENTER(0);  // Simple didn't implement local variables
-
-  node->statements()->accept(this, lvl);
-
-  // end the main function
-  _pf.INT(0);
-  _pf.STFVAL32();
-  _pf.LEAVE();
-  _pf.RET();
-
-  // these are just a few library function imports
-  _pf.EXTERN("readi");
-  _pf.EXTERN("printi");
-  _pf.EXTERN("prints");
-  _pf.EXTERN("println");
-}
-
-//---------------------------------------------------------------------------
-
 void gr8::postfix_writer::do_evaluation_node(gr8::evaluation_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   node->argument()->accept(this, lvl); // determine the value
@@ -229,22 +247,9 @@ void gr8::postfix_writer::do_read_node(gr8::read_node * const node, int lvl) {
   ASSERT_SAFE_EXPRESSIONS;
   _pf.CALL("readi");
   _pf.LDFVAL32();
-  node->argument()->accept(this, lvl);
   _pf.STINT();
 }
 
-//---------------------------------------------------------------------------
-
-void gr8::postfix_writer::do_while_node(gr8::while_node * const node, int lvl) {
-  ASSERT_SAFE_EXPRESSIONS;
-  int lbl1, lbl2;
-  _pf.LABEL(mklbl(lbl1 = ++_lbl));
-  node->condition()->accept(this, lvl);
-  _pf.JZ(mklbl(lbl2 = ++_lbl));
-  node->block()->accept(this, lvl + 2);
-  _pf.JMP(mklbl(lbl1));
-  _pf.LABEL(mklbl(lbl2));
-}
 
 //---------------------------------------------------------------------------
 
@@ -269,4 +274,54 @@ void gr8::postfix_writer::do_if_else_node(gr8::if_else_node * const node, int lv
   _pf.LABEL(mklbl(lbl1));
   node->elseblock()->accept(this, lvl + 2);
   _pf.LABEL(mklbl(lbl1 = lbl2));
+}
+
+void gr8::postfix_writer::do_sweeping_node(gr8::sweeping_node *const node, int lvl) {
+  // EMPTY
+}
+
+void gr8::postfix_writer::do_return_node(gr8::return_node *const node, int lvl) {
+  // EMPTY
+}
+
+
+void gr8::postfix_writer::do_apply_node(gr8::apply_node *const node, int lvl) {
+  ASSERT_SAFE_EXPRESSIONS;
+
+  std::string condition = mklbl(++_lbl);
+  std::string end = mklbl(++_lbl);
+  std::shared_ptr<gr8::symbol> symbol = _symtab.find(node->idsrt());
+
+  // i = from
+  node->from()->accept(this, lvl);
+
+  // i <= to
+  _pf.DUP32();
+  _pf.ALIGN();
+  _pf.LABEL(condition);
+  node->to()->accept(this, lvl);
+  _pf.LE();
+  _pf.JZ(end);
+
+  _pf.DUP32();
+  _pf.INT(node->vector()->type()->subtype()->size());
+  _pf.MUL;
+  node->vector()->accept(this, lvl);
+  _pf.ADD();
+
+  if (node->vector()->type()->name() == basic_type::TYPE_DOUBLE)
+    _pf.LDDOUBLE();
+  else
+    _pf.LDINT();
+
+  _pf.CALL(node->idstr());
+
+  //increment
+
+  _pf.INT(0);
+  _pf.ADD();
+  _pf.JMP(condition);
+  _pf.ALIGN();
+  _pf.LABEL(end);
+  _pf.TRASH(4);
 }

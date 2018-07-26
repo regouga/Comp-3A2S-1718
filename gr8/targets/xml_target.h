@@ -25,6 +25,7 @@ namespace gr8 {
       compiler->ast()->accept(&writer, 0);
       return true;
     }
+    
 
   };
 
